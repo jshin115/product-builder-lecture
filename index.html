@@ -3,11 +3,204 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>나의 첫 홈페이지</title>
+  <meta name="theme-color" content="#f6f5ef">
+  <meta name="description" content="버튼 한 번으로 로또 6/45 번호를 무작위로 추천받으세요. 최대 5게임을 한 번에 만들고 복사할 수 있습니다.">
+  <title>행운 한 장 — 로또 번호 추천</title>
+  <style>
+    :root { color-scheme: light; --ink: #203e32; --muted: #67756a; --paper: #f6f5ef; --line: #dedfd5; --green: #285b43; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: "맑은 고딕", "Malgun Gothic", system-ui, sans-serif; }
+    button, select { font: inherit; }
+    button, a, select { -webkit-tap-highlight-color: transparent; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid #c78122; outline-offset: 5px; }
+    .wrap { width: min(1080px, calc(100% - 48px)); margin: auto; }
+    header { height: 96px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 800; font-size: 21px; letter-spacing: -1px; }
+    .brand-mark { display: grid; place-items: center; width: 33px; height: 33px; background: var(--green); color: #e4f2bb; border-radius: 50%; font-size: 23px; }
+    .header-note { color: var(--muted); font-size: 12px; letter-spacing: 2px; }
+    main { padding: 69px 0 54px; }
+    .hero { text-align: center; }
+    .eyebrow { display: inline-flex; gap: 8px; align-items: center; font-size: 12px; font-weight: 700; letter-spacing: 2px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #719452; }
+    h1 { margin: 22px 0 18px; font-size: clamp(36px, 5.5vw, 60px); letter-spacing: -3px; line-height: 1.25; font-weight: 800; }
+    h1 span { color: #648448; }
+    .intro { margin: 0; color: var(--muted); font-size: 16px; line-height: 1.9; word-break: keep-all; }
+    .generator { max-width: 780px; margin: 39px auto 0; border: 1px solid var(--line); border-radius: 20px; background: #fffefb; box-shadow: 0 14px 45px #203e3207; overflow: hidden; }
+    .ticket-top { padding: 25px 32px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .ticket-top h2 { font-size: 17px; margin: 0; letter-spacing: -.6px; }
+    .ticket-label { font-size: 11px; letter-spacing: 2px; color: var(--muted); }
+    .ticket-body { padding: 0 32px 25px; }
+    .result-list { display: grid; gap: 12px; }
+    .game { display: flex; align-items: center; justify-content: center; gap: 23px; padding: 20px 0; border-top: 1px solid #efefe7; }
+    .game-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .balls { display: flex; justify-content: center; gap: 12px; }
+    .ball { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; font-size: 21px; font-weight: 800; font-variant-numeric: tabular-nums; box-shadow: inset 0 -3px 0 #0000000a; }
+    .yellow { background: #f6d671; color: #664600; }
+    .blue { background: #c0dcf4; color: #244d72; }
+    .red { background: #f6c7ba; color: #813e32; }
+    .gray { background: #dedfdc; color: #4f5850; }
+    .green { background: #d7e6b8; color: #405d26; }
+    .empty { padding: 27px 0 14px; border-top: 1px solid #efefe7; text-align: center; }
+    .empty .ball { background: #eeeee6; color: #949b8b; box-shadow: none; }
+    .empty p { color: var(--muted); font-size: 13px; margin: 22px 0 5px; }
+    .ticket-controls { position: relative; padding: 24px 32px; border-top: 1px dashed #cdd2c3; background: #f9faf4; }
+    .control-row { display: flex; gap: 12px; }
+    .select-wrap { display: flex; align-items: center; gap: 12px; padding: 0 15px; background: white; border: 1px solid #d8ded2; border-radius: 10px; }
+    .select-wrap label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+    select { border: 0; padding: 15px 5px; color: var(--ink); background: white; font-weight: 700; cursor: pointer; }
+    .generate { flex: 1; min-height: 54px; border: 0; border-radius: 10px; background: var(--green); color: white; font-weight: 700; transition: background .15s, transform .15s; }
+    .generate:hover { background: #1c4632; }
+    .generate:active { transform: translateY(1px); }
+    .generate span { margin-right: 9px; color: #c9e49b; }
+    .result-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; min-height: 25px; gap: 12px; }
+    .status { margin: 0; font-size: 12px; color: var(--muted); }
+    .copy { border: 0; padding: 5px 0 5px 10px; color: var(--green); background: transparent; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .copy:disabled { opacity: .4; cursor: default; }
+    .legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 18px; margin: 22px 0 0; padding: 0; list-style: none; }
+    .legend li { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 11px; }
+    .swatch { width: 9px; height: 9px; border-radius: 50%; }
+    .notes { max-width: 780px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 43px auto 0; }
+    .note-number { display: block; color: #859671; font-size: 11px; letter-spacing: 1px; margin-bottom: 10px; }
+    .notes h3 { font-size: 14px; margin: 0 0 8px; }
+    .notes p { color: var(--muted); font-size: 12px; line-height: 1.8; margin: 0; word-break: keep-all; }
+    footer { border-top: 1px solid var(--line); padding: 25px 0 30px; display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 11px; line-height: 1.8; }
+    footer p { margin: 0; }
+    .footer-brand { font-weight: 700; color: var(--ink); white-space: nowrap; }
+    @media (max-width: 600px) {
+      .wrap { width: calc(100% - 32px); }
+      header { height: 76px; }
+      .header-note { font-size: 10px; letter-spacing: 1px; }
+      main { padding: 44px 0 36px; }
+      h1 { letter-spacing: -2px; }
+      .intro { font-size: 14px; }
+      .generator { margin-top: 28px; }
+      .ticket-top { padding: 22px 18px 18px; }
+      .ticket-body { padding: 0 14px 20px; }
+      .ticket-controls { padding: 20px 18px; }
+      .game { flex-direction: column; gap: 12px; padding: 16px 0; }
+      .balls { gap: 8px; }
+      .ball { width: clamp(32px, 10vw, 46px); height: clamp(32px, 10vw, 46px); font-size: 18px; }
+      .control-row { flex-direction: column; }
+      .select-wrap { justify-content: space-between; }
+      .legend { gap: 12px; }
+      .notes { gap: 22px; grid-template-columns: 1fr; margin-top: 32px; }
+      .note-number { float: left; margin: 3px 14px 0 0; }
+      .notes p { padding-left: 29px; }
+      footer { flex-direction: column; gap: 7px; }
+    }
+  </style>
 </head>
 <body>
-  <h1>안녕하세요!</h1>
-  <p>직접 만든 첫 홈페이지예요.</p>
-  <button onclick="alert('반가워요!')">눌러 보세요</button>
+  <div class="wrap">
+    <header>
+      <a class="brand" href="./" aria-label="행운 한 장 홈"><span class="brand-mark" aria-hidden="true">✳</span>행운 한 장</a>
+      <span class="header-note">LOTTO 6/45</span>
+    </header>
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <div class="eyebrow"><span class="dot" aria-hidden="true"></span>A LITTLE LUCK FOR YOU</div>
+        <h1 id="page-title">오늘의 기대를 담은<br><span>여섯 개의 숫자.</span></h1>
+        <p class="intro">어떤 번호를 고를지 고민될 때,<br>버튼 한 번으로 나만의 행운 한 장을 만들어 보세요.</p>
+      </section>
+      <section class="generator" aria-labelledby="ticket-title">
+        <div class="ticket-top"><h2 id="ticket-title">나의 행운 번호</h2><span class="ticket-label">YOUR LUCKY PICK</span></div>
+        <div class="ticket-body">
+          <div id="results" class="result-list">
+            <div class="empty">
+              <div class="balls" aria-hidden="true"><span class="ball">?</span><span class="ball">?</span><span class="ball">?</span><span class="ball">?</span><span class="ball">?</span><span class="ball">?</span></div>
+              <p>어떤 숫자가 기다리고 있을까요?</p>
+            </div>
+          </div>
+        </div>
+        <div class="ticket-controls">
+          <div class="control-row">
+            <div class="select-wrap"><label for="game-count">추천 개수</label><select id="game-count"><option value="1">1게임</option><option value="2">2게임</option><option value="3">3게임</option><option value="4">4게임</option><option value="5">5게임</option></select></div>
+            <button id="generate" class="generate" type="button"><span aria-hidden="true">✳</span><b id="generate-label">행운 번호 뽑기</b></button>
+          </div>
+          <div class="result-footer"><p id="status" class="status" role="status" aria-live="polite">1~45 중 중복 없이 6개를 추천해요.</p><button id="copy" class="copy" type="button" disabled>번호 복사 ↗</button></div>
+        </div>
+      </section>
+      <ul class="legend" aria-label="번호 구간별 색상"><li><span class="swatch yellow"></span>1–10</li><li><span class="swatch blue"></span>11–20</li><li><span class="swatch red"></span>21–30</li><li><span class="swatch gray"></span>31–40</li><li><span class="swatch green"></span>41–45</li></ul>
+      <section class="notes" aria-label="이용 안내">
+        <div><span class="note-number">01</span><h3>고민 없이, 무작위로</h3><p>1부터 45까지의 숫자 중 서로 다른<br>6개의 번호를 무작위로 뽑아요.</p></div>
+        <div><span class="note-number">02</span><h3>한 번에 다섯 게임까지</h3><p>원하는 게임 수를 선택해 보세요.<br>보기 편하게 작은 숫자부터 정렬해요.</p></div>
+        <div><span class="note-number">03</span><h3>마음에 들면 복사하기</h3><p>추천받은 번호를 한 번에 복사해서<br>원하는 곳에 간편하게 기록하세요.</p></div>
+      </section>
+      <noscript><p>번호를 추천받으려면 브라우저에서 JavaScript를 활성화해 주세요.</p></noscript>
+    </main>
+    <footer><p class="footer-brand">✳ 행운 한 장</p><p>재미로 만나는 무작위 번호 추천 서비스입니다. 당첨을 예측하거나 보장하지 않습니다.</p></footer>
+  </div>
+  <script>
+    const results = document.getElementById('results');
+    const status = document.getElementById('status');
+    const copyButton = document.getElementById('copy');
+    let games = [];
+
+    function randomInt(max) {
+      const range = 0x100000000;
+      const limit = range - (range % max);
+      const buffer = new Uint32Array(1);
+      do { crypto.getRandomValues(buffer); } while (buffer[0] >= limit);
+      return buffer[0] % max;
+    }
+
+    function createGame() {
+      const pool = Array.from({ length: 45 }, (_, index) => index + 1);
+      for (let index = 0; index < 6; index++) {
+        const pick = index + randomInt(pool.length - index);
+        [pool[index], pool[pick]] = [pool[pick], pool[index]];
+      }
+      return pool.slice(0, 6).sort((a, b) => a - b);
+    }
+
+    function ballColor(number) {
+      return ['yellow', 'blue', 'red', 'gray', 'green'][Math.floor((number - 1) / 10)];
+    }
+
+    document.getElementById('generate').addEventListener('click', () => {
+      const count = Number(document.getElementById('game-count').value);
+      games = Array.from({ length: count }, createGame);
+      results.replaceChildren();
+      games.forEach((numbers, index) => {
+        const row = document.createElement('div');
+        row.className = 'game';
+        const label = document.createElement('span');
+        label.className = 'game-label';
+        label.textContent = `GAME ${String(index + 1).padStart(2, '0')}`;
+        const balls = document.createElement('div');
+        balls.className = 'balls';
+        balls.setAttribute('role', 'group');
+        balls.setAttribute('aria-label', `${index + 1}게임 번호`);
+        numbers.forEach(number => {
+          const ball = document.createElement('span');
+          ball.className = `ball ${ballColor(number)}`;
+          ball.textContent = number;
+          balls.append(ball);
+        });
+        row.append(label, balls);
+        results.append(row);
+      });
+      copyButton.disabled = false;
+      document.getElementById('generate-label').textContent = '새로운 번호 뽑기';
+      status.textContent = `${count}게임의 행운 번호가 준비됐어요.`;
+    });
+
+    copyButton.addEventListener('click', async () => {
+      const text = games.map((numbers, index) => `${index + 1}게임: ${numbers.join(', ')}`).join('\n');
+      try {
+        await navigator.clipboard.writeText(text);
+        status.textContent = '번호를 복사했어요. 원하는 곳에 붙여 넣으세요!';
+      } catch {
+        status.textContent = '자동 복사를 사용할 수 없어요. 번호를 선택해 복사해 주세요.';
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(results);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    });
+  </script>
 </body>
 </html>
